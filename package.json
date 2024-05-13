@@ -1,0 +1,14 @@
+{
+  "name": "nodejs-web-scrapper",
+  "version": "1.0.0",
+  "description": "Web Scrappers",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node Scrappers/cuvette.js",
+    "dev": "nodemon Scrappers/cuvette.js"
+  },
+  "keywords": [],
+  "author": "Monu",
+  "license": "ISC"
+}
