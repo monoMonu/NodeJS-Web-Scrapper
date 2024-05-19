@@ -10,5 +10,8 @@
   },
   "keywords": [],
   "author": "Monu",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "selenium-webdriver": "^4.21.0"
+  }
 }
