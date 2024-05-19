@@ -9,11 +9,12 @@ options.addArguments('--headless');
 options.addArguments('--disable-gpu');
 options.setLoggingPrefs({ browser: 'OFF' });
 
-const driver = await new Builder()
-   .forBrowser('chrome')
-   .setChromeOptions(options)
-   .build();
-
+async function createDriver() {
+   return await new Builder()
+      .forBrowser('chrome')
+      .setChromeOptions(options)
+      .build();
+}
 
 const type = {
    'internships': {
@@ -38,106 +39,113 @@ const type = {
    }
 }
 
-async function scrapeWebsite() {
-
+async function scrapeWebsite(retryCount = 5) {
+   let driver = await createDriver();
    try {
       await driver.get('https://cuvette.tech/app/student/login');
 
-      // Log in 
+      // Log in
       // Wait for the username field to be located
-      const usernameField = await driver.wait(until.elementLocated(By.css('.basic-input.LoginWithEmail_darkBorder__3htqi')), 10000);
-      await driver.wait(until.elementIsVisible(usernameField), 10000);
+      const usernameField = await driver.wait(until.elementLocated(By.css('.basic-input.LoginWithEmail_darkBorder__3htqi')), 20000);
+      await driver.wait(until.elementIsVisible(usernameField), 20000);
       await usernameField.sendKeys('nogofa@cyclelove.cc');
 
       // Wait for the password field to be located
-      const passwordField = await driver.wait(until.elementLocated(By.css('.PasswordInput_formPasswordInput__1A7J_.PasswordInput_darkBorder__1tlYC>input')), 10000);
-      await driver.wait(until.elementIsVisible(passwordField), 10000);
+      const passwordField = await driver.wait(until.elementLocated(By.css('.PasswordInput_formPasswordInput__1A7J_.PasswordInput_darkBorder__1tlYC>input')), 20000);
+      await driver.wait(until.elementIsVisible(passwordField), 20000);
       await passwordField.sendKeys('cosmo@cuvette');
 
-      const submitButton = await driver.wait(until.elementLocated(By.css('.Button_button__2Lf63.LoginWithEmail_login__T6YaR')), 10000);
-      await driver.wait(until.elementIsVisible(submitButton), 10000);
+      const submitButton = await driver.wait(until.elementLocated(By.css('.Button_button__2Lf63.LoginWithEmail_login__T6YaR')), 20000);
+      await driver.wait(until.elementIsVisible(submitButton), 20000);
       await submitButton.click();
-      
-      // This is to make sure that the page has loaded completely after logging in 
-      await driver.wait(until.elementLocated(By.css('.DashboardPanel_navigation__10Cmg')), 10000);
 
-      const fulltimeJobs = await scrape('fulltimeJobs');
-      const internships = await scrape('internships');
+      // This is to make sure that the page has loaded completely after logging in
+      await driver.wait(until.elementLocated(By.css('.DashboardPanel_navigation__10Cmg')), 20000);
+
+      const fulltimeJobs = await scrape('fulltimeJobs', driver);
+      const internships = await scrape('internships', driver);
 
       console.log(data);
 
-   }
-   catch(error){
-      console.log(`Error while navigating to the page to be scrapped. \n Error: ${error}`)
-   }
-   finally {
+   } catch (error) {
+      if (retryCount > 0) {
+         console.log(`Error while navigating to the page to be scraped. Retrying... (${retryCount} retries left)`);
+         await driver.quit();
+         await new Promise(resolve => setTimeout(resolve, 2000));
+         await scrapeWebsite(retryCount - 1);
+      } else {
+         console.log(`Error while navigating to the page to be scraped. No retries left. \nError: ${error}`);
+      }
+   } finally {
       await driver.quit();
    }
 }
 
 const data = [];
 
-async function scrape(t){
-
+async function scrape(t, driver, retryCount = 5) {
    try {
-
-      // The page to be scrapped
+      // The page to be scraped
       await driver.get(`https://cuvette.tech/app/student/jobs/${t}/filters?sortByDate=true`);
-      await driver.wait(until.elementLocated(By.css(`.${type[t].valueClass}`)), 10000);
-      
-      await driver.wait(until.elementLocated(By.css(`.${type[t].containerClass}`)), 10000);
+      // Ensuring data has loaded
+      await driver.wait(until.elementLocated(By.css(`.${type[t].valueClass}`)), 20000);
+
+      await driver.wait(until.elementLocated(By.css(`.${type[t].containerClass}`)), 20000);
 
       const containers = await driver.findElements(By.className(type[t].containerClass));
-      
-      // Iterate over the elements and extract their content
-      for (let i=0; i < containers.length; i++) {
 
-         // Ensuring data has loaded
+      // Iterate over the elements and extract their content
+      for (let i = 0; i < containers.length; i++) {
+
          const obj = {};
 
          // Filtering out last 12hrs postings
          const postTimeString = await containers[i].findElement(By.css(`.${type[t].postTimeClass}>p`)).getText();
          let postedString = postTimeString.split(' ');
-         postedString = postedString[postedString.length-2];
+         postedString = postedString[postedString.length - 2];
          let posted = parseInt(postedString);
 
+         if ((postedString.search('h') === -1 || posted >= 24
+      ) && postedString.search('m') === -1) break;
 
-         if ((postedString.search('h') ===-1 || posted >= 12) && postedString.search('m') ===-1) break;
-   
          obj['Title'] = await containers[i].findElement(By.css(`.${type[t].headingClass} h3`)).getText();
-   
+
          let locNcomp = await containers[i].findElement(By.css(`.${type[t].headingClass} p`)).getText();
          locNcomp = locNcomp.split('|');
-   
+
          obj['Company'] = locNcomp[0];
          obj['Location'] = locNcomp[1];
-   
+
          let keys = await containers[i].findElements(By.className(type[t].keyClass));
          let values = await containers[i].findElements(By.className(type[t].valueClass));
-   
-         for(let j=0; j < keys.length; j++){
-            const key =  await keys[j].getText();
-            if(key === 'Office Location') continue;
+
+         for (let j = 0; j < keys.length; j++) {
+            const key = await keys[j].getText();
+            if (key === 'Office Location') continue;
             obj[key] = await values[j].getText();
          }
-         
-         const shareBtn = await driver.wait(until.elementLocated(By.css(type[t].shareBtnCSS), 10000));
+
+         const shareBtn = await driver.wait(until.elementLocated(By.css(type[t].shareBtnCSS), 20000));
          await driver.executeScript("arguments[0].click();", shareBtn);
          const textarea = await driver.wait(until.elementLocated(By.css(type[t].textareaCSS)));
          let value = await textarea.getAttribute('value');
          const applyLink = value.split('Link:')[1];
-         const cancelBtn = await driver.wait(until.elementLocated(By.css(type[t].cancelBtnCSS)), 10000);
+         const cancelBtn = await driver.wait(until.elementLocated(By.css(type[t].cancelBtnCSS)), 20000);
          await driver.executeScript("arguments[0].click();", cancelBtn);
 
          obj['Apply here'] = applyLink;
 
          data.push(obj);
-         
       }
    } catch (error) {
-      console.log(`Error while scrapping data. \nError: ${error}`)
+      if (retryCount > 0) {
+         console.log(`Error while scraping data. Retrying... (${retryCount} retries left)`);
+         await new Promise(resolve => setTimeout(resolve, 5000));
+         await scrape(t, driver, retryCount - 1);
+      } else {
+         console.log(`Error while scraping data. No retries left. \nError: ${error}`);
+      }
    }
-
    return data;
 }
 
