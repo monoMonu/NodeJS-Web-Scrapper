@@ -105,8 +105,7 @@ async function scrape(t, driver, retryCount = 5) {
          postedString = postedString[postedString.length - 2];
          let posted = parseInt(postedString);
 
-         if ((postedString.search('h') === -1 || posted >= 24
-      ) && postedString.search('m') === -1) break;
+         if ((postedString.search('h') === -1 || posted >= 12) && postedString.search('m') === -1) break;
 
          obj['Title'] = await containers[i].findElement(By.css(`.${type[t].headingClass} h3`)).getText();
 
