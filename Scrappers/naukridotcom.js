@@ -21,8 +21,8 @@ import puppeteer from 'puppeteer';
             const ApplyLink = job.querySelector('.title a')?.href || 'N/A';
 
             jobs.push({
-                mainData: { Title, Company,  Location },
-                additionalData: { ApplyLink, Experience, Salary, PostedDate }
+                mainData: { Title, Company,  Location, ApplyLink},
+                additionalData: {  Experience, Salary, PostedDate }
             });
         });
 
@@ -42,8 +42,8 @@ import puppeteer from 'puppeteer';
             const ApplyLink = job.querySelector('.s2j__tupple-container a')?.href || 'N/A';
 
             jobs.push({
-                mainData: { Title, Company, Location },
-                additionalData: { ApplyLink, Experience, Salary, PostedDate }
+                mainData: { Title, Company, Location, ApplyLink },
+                additionalData: { Experience, Salary, PostedDate }
             });
         });
 
