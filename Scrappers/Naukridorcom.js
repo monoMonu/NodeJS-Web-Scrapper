@@ -22,12 +22,12 @@ import puppeteer from 'puppeteer';
             const Title = job.querySelector('.title')?.innerText || 'N/A';
             const Company = job.querySelector('.comp-name')?.innerText || 'N/A';
             const Location = job.querySelector('.locWdth')?.innerText || 'N/A';
-            const Stipend = job.querySelector('.sal-wrap.ver-line')?.innerText || 'N/A';
+            const Stipend= job.querySelector('.sal-wrap.ver-line')?.innerText || 'N/A';
             const Date = job.querySelector('.job-post-day')?.innerText || 'N/A';
             const ApplyLink = job.querySelector('.title')?.href || 'N/A';
 
             jobs.push({
-                mainData: { Title, Company, Location, ApplyLink },
+                mainData: {  Title, Company, Location, ApplyLink},
                 additionalData: { Stipend, Date }
             });
         });
@@ -35,18 +35,10 @@ import puppeteer from 'puppeteer';
         return jobs;
     });
 
-    // Filter job postings from the last 12 hours
-    const twelveHoursAgo = new Date();
-    twelveHoursAgo.setHours(twelveHoursAgo.getHours() - 12);
+    const allJobs = [...jobsFromFirstSelector];
 
-    const filteredJobs = jobsFromFirstSelector.filter(job => {
-        const dateText = job.additionalData.Date;
-        const jobDate = new Date(dateText); // Adjust this line to parse the date properly according to the format on the site
-        return jobDate >= twelveHoursAgo;
-    });
-
-    // Print the filtered job data
-    filteredJobs.forEach((job, index) => {
+    // Print the job data
+    allJobs.forEach((job, index) => {
         console.log("Main Data:");
         console.log(job.mainData);
         console.log("Additional Data:");
