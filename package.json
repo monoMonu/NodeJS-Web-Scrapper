@@ -12,6 +12,7 @@
   "author": "Monu",
   "license": "ISC",
   "dependencies": {
+    "puppeteer": "^22.10.0",
     "selenium-webdriver": "^4.21.0"
   }
 }
