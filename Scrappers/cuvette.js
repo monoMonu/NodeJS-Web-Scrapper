@@ -97,7 +97,10 @@ async function scrape(t, driver, retryCount = 5) {
       // Iterate over the elements and extract their content
       for (let i = 0; i < containers.length; i++) {
 
-         const obj = {};
+         const obj = {
+            mainData: {},
+            additionalData: {},
+         };
 
          // Filtering out last 12hrs postings
          const postTimeString = await containers[i].findElement(By.css(`.${type[t].postTimeClass}>p`)).getText();
@@ -107,13 +110,24 @@ async function scrape(t, driver, retryCount = 5) {
 
          if ((postedString.search('h') === -1 || posted >= 12) && postedString.search('m') === -1) break;
 
-         obj['Title'] = await containers[i].findElement(By.css(`.${type[t].headingClass} h3`)).getText();
+         const Title = await containers[i].findElement(By.css(`.${type[t].headingClass} h3`)).getText();
 
          let locNcomp = await containers[i].findElement(By.css(`.${type[t].headingClass} p`)).getText();
          locNcomp = locNcomp.split('|');
 
-         obj['Company'] = locNcomp[0];
-         obj['Location'] = locNcomp[1];
+         const Company = locNcomp[0];
+         const Location = locNcomp[1];
+
+         
+         const shareBtn = await driver.wait(until.elementLocated(By.css(type[t].shareBtnCSS), 20000));
+         await driver.executeScript("arguments[0].click();", shareBtn);
+         const textarea = await driver.wait(until.elementLocated(By.css(type[t].textareaCSS)));
+         let value = await textarea.getAttribute('value');
+         const Link = value.split('Link:')[1];
+         const cancelBtn = await driver.wait(until.elementLocated(By.css(type[t].cancelBtnCSS)), 20000);
+         await driver.executeScript("arguments[0].click();", cancelBtn);
+         
+         obj.mainData = { Title, Company, Location, Link};
 
          let keys = await containers[i].findElements(By.className(type[t].keyClass));
          let values = await containers[i].findElements(By.className(type[t].valueClass));
@@ -121,18 +135,8 @@ async function scrape(t, driver, retryCount = 5) {
          for (let j = 0; j < keys.length; j++) {
             const key = await keys[j].getText();
             if (key === 'Office Location') continue;
-            obj[key] = await values[j].getText();
+            obj.additionalData[key] = await values[j].getText();
          }
-
-         const shareBtn = await driver.wait(until.elementLocated(By.css(type[t].shareBtnCSS), 20000));
-         await driver.executeScript("arguments[0].click();", shareBtn);
-         const textarea = await driver.wait(until.elementLocated(By.css(type[t].textareaCSS)));
-         let value = await textarea.getAttribute('value');
-         const applyLink = value.split('Link:')[1];
-         const cancelBtn = await driver.wait(until.elementLocated(By.css(type[t].cancelBtnCSS)), 20000);
-         await driver.executeScript("arguments[0].click();", cancelBtn);
-
-         obj['Apply here'] = applyLink;
 
          data.push(obj);
       }
