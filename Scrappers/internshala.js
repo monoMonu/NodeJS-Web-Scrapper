@@ -42,20 +42,18 @@ class Internshala {
                     const Role = page(element).find('.job-internship-name').text().trim();
                     const Company = page(element).find('.company-name').text().trim();
                     const Posted = page(element).find('.status-success').text().trim();
-                    const link_element = $('.container-fluid.individual_internship.view_detail_button.visibilityTrackerItem');
-                    const Link = "https://internshala.com"+link_element.attr('data-href');
+                    const internshipDivs = $('.container-fluid.individual_internship.view_detail_button.visibilityTrackerItem');
+                    const Link = "https://internshala.com"+ $(element).attr('data-href');
                     const Location = page(element).find('.locations').text().trim();
                     const other_details = page(element).find('.item_body');
-                    const Duration = other_details.length > 2 ? other_details.eq(1).text().trim() : 'N/A';
+                    // const Duration = other_details.length > 2 ? other_details.eq(1).text().trim() : 'N/A';
                     const stipend_element = page(element).find('.stipend');
                     const Stipend = stipend_element.length ? stipend_element.text().trim() : 'N/A';
-
                     const internship_data = {
                         Company,
                         Role,
                         Link,
                         Location,
-                        Duration,
                         Stipend,
                         Posted, 
                     };
