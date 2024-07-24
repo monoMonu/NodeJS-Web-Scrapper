@@ -1,18 +1,18 @@
 import { Builder, By, until, logging } from 'selenium-webdriver';
-import chrome from 'selenium-webdriver/chrome.js';
-
-const prefs = new logging.Preferences();
-prefs.setLevel(logging.Type.BROWSER, logging.Level.OFF);
-
-const options = new chrome.Options();
-options.addArguments('--headless');
-options.addArguments('--disable-gpu');
-options.setLoggingPrefs({ browser: 'OFF' });
+import { Options, ServiceBuilder } from 'selenium-webdriver/chrome.js';
+import chromedriver from 'chromedriver';
 
 async function createDriver() {
-   return await new Builder()
+   const options = new Options();
+   options.addArguments('--headless');
+   options.addArguments('--disable-gpu');
+   options.addArguments('--no-sandbox');
+   options.addArguments('--disable-dev-shm-usage');
+
+   return new Builder()
       .forBrowser('chrome')
       .setChromeOptions(options)
+      .withCapabilities({ 'goog:chromeOptions': { binary: chromedriver.path } })
       .build();
 }
 
@@ -142,7 +142,7 @@ async function scrape(t, driver, retryCount = 5) {
       }
    } catch (error) {
       if (retryCount > 0) {
-         console.log(`Error while scraping data. Retrying... (${retryCount} retries left)`);
+         console.log(`Error while scraping data. Error: ${error}. Retrying... (${retryCount} retries left)`);
          await new Promise(resolve => setTimeout(resolve, 5000));
          await scrape(t, driver, retryCount - 1);
       } else {
