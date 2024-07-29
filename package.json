@@ -2,14 +2,14 @@
   "name": "nodejs-web-scrapper",
   "version": "1.0.0",
   "description": "Web Scrappers",
-  "main": "scrappers",
+  "main": "index.js",
   "type": "module",
   "scripts": {
     "cuvette": "node ./Scrappers/cuvette.js",
     "naukridotcom": "node ./Scrappers/Naukridotcom.js",
     "internshala": "node ./Scrappers/internshala.js",
     "start": "npm-run-all --parallel cuvette naukridotcom internshala",
-    "dev": "nodemon cuvette.js"
+    "dev": "node ./Scrappers/cuvette.js"
   },
   "keywords": [],
   "author": "Monu",

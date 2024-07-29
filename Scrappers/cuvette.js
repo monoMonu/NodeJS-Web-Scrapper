@@ -40,8 +40,9 @@ const type = {
 }
 
 async function scrapeWebsite(retryCount = 5) {
-   let driver = await createDriver();
+   let driver;
    try {
+      driver = await createDriver();
       await driver.get('https://cuvette.tech/app/student/login');
 
       // Log in
@@ -77,7 +78,8 @@ async function scrapeWebsite(retryCount = 5) {
          console.log(`Error while navigating to the page to be scraped. No retries left. \nError: ${error}`);
       }
    } finally {
-      await driver.quit();
+      if(driver)
+         await driver.quit();
    }
 }
 
