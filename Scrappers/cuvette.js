@@ -102,13 +102,13 @@ async function scrape(t, driver, retryCount = 5) {
             additionalData: {},
          };
 
-         // Filtering out last 12hrs postings
          const postTimeString = await containers[i].findElement(By.css(`.${type[t].postTimeClass}>p`)).getText();
          let postedString = postTimeString.split(' ');
          postedString = postedString[postedString.length - 2];
          let posted = parseInt(postedString);
-
-         if ((postedString.search('h') === -1 || posted >= 12) && postedString.search('m') === -1) break;
+         
+         // Filtering out last 12hrs postings
+         if ((postedString.search('h') === -1 || posted >= 24) && postedString.search('m') === -1) break;
 
          const Title = await containers[i].findElement(By.css(`.${type[t].headingClass} h3`)).getText();
 

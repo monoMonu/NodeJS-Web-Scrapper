@@ -2,19 +2,26 @@
   "name": "nodejs-web-scrapper",
   "version": "1.0.0",
   "description": "Web Scrappers",
-  "main": "index.js",
+  "main": "scrappers",
   "type": "module",
   "scripts": {
-    "start": "node Scrappers/cuvette.js",
-    "dev": "nodemon Scrappers/cuvette.js"
+    "cuvette": "node ./Scrappers/cuvette.js",
+    "naukridotcom": "node ./Scrappers/Naukridotcom.js",
+    "internshala": "node ./Scrappers/internshala.js",
+    "start": "npm-run-all --parallel cuvette naukridotcom internshala",
+    "dev": "nodemon cuvette.js"
   },
   "keywords": [],
   "author": "Monu",
   "license": "ISC",
   "dependencies": {
-    "chromedriver": "^126.0.5",
-    "googleapis": "^137.1.0",
+    "axios": "^1.7.2",
+    "cheerio": "^1.0.0-rc.12",
+    "chromedriver": "^127.0.0",
     "puppeteer": "^22.10.0",
-    "selenium-webdriver": "^4.23.0"
+    "selenium-webdriver": "^4.21.0"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
   }
 }
