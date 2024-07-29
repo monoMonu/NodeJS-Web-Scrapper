@@ -1,10 +1,11 @@
 import { Builder, By, until, logging } from 'selenium-webdriver';
-import { Options, ServiceBuilder } from 'selenium-webdriver/chrome.js';
+import { Options } from 'selenium-webdriver/chrome.js';
 import chromedriver from 'chromedriver';
+import { storeData } from '../index.js';
 
 async function createDriver() {
    const options = new Options();
-   options.addArguments('--headless');
+   // options.addArguments('--headless');
    options.addArguments('--disable-gpu');
    options.addArguments('--no-sandbox');
    options.addArguments('--disable-dev-shm-usage');
@@ -67,6 +68,7 @@ async function scrapeWebsite(retryCount = 5) {
       const internships = await scrape('internships', driver);
 
       console.log(data);
+      return data;
 
    } catch (error) {
       if (retryCount > 0) {
@@ -154,4 +156,8 @@ async function scrape(t, driver, retryCount = 5) {
    return data;
 }
 
-scrapeWebsite();
+scrapeWebsite()
+   .then(async result => {
+      console.log(result);
+      await storeData(result);
+   })

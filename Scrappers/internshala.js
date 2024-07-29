@@ -1,5 +1,6 @@
 import axios from 'axios';
 import cheerio from 'cheerio';
+import { storeData } from '../index.js';
 
 class Internshala {
     constructor(search_type) {
@@ -77,7 +78,10 @@ class Internshala {
 // Example usage: Insert the role you're looking for in the function
 const search = new Internshala('web development');
 search.internships()
-    .then(result => console.log(result))
+    .then(async result => {
+        console.log(result);
+        await storeData(result.data);
+    })
     .catch(error => console.error(error));
 
     

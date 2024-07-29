@@ -1,6 +1,7 @@
 import puppeteer from 'puppeteer';
+import { storeData } from '../index.js';
 
-(async () => {
+const scrapeWebsite = async () => {
     const currentTimestamp = new Date().toLocaleDateString(); // Get the current date
 
     // Launch the browser
@@ -38,18 +39,17 @@ import puppeteer from 'puppeteer';
             return jobs;
         }, currentTimestamp);
 
-        // Print the filtered job data
-        jobsFromFirstSelector.forEach((job, index) => {
-            console.log("Main Data:");
-            console.log(job.mainData);
-            console.log("Additional Data:");
-            console.log(job.additionalData);
-            console.log('---------------------------');
-        });
+        return jobsFromFirstSelector;
 
     } catch (error) {
         console.error('Error:', error);
     } finally {
         await browser.close();
     }
-})();
+}
+
+scrapeWebsite()
+    .then( async result => {
+        console.log(result);
+        await storeData(result);
+    })
